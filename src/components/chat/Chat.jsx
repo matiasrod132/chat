@@ -22,7 +22,7 @@ const Chat = () => {
     
     useEffect(() => {
         endRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [chat?.messages]); // Añade chat?.messages como dependencia
+    }, [chat?.messages]);
 
     useEffect(() => {
         const unSub = onSnapshot(doc(db, "chats", chatId), (res) => {
