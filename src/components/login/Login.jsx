@@ -34,7 +34,7 @@ const Login = () => {
 
             const imgUrl = await upload(avatar.file)
 
-            await setDoc(doc(db, "username", res.user.uid), {
+            await setDoc(doc(db, "users", res.user.uid), {
                 username,
                 email,
                 avatar: imgUrl,
