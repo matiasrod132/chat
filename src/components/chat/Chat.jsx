@@ -119,17 +119,15 @@ const Chat = () => {
                 </div>
             </div>
             <div className="center">
-                {chat?.messages?.map((message) => {
-                    return(
-                    <div className={message.senderId === currentUser?.id ? "message own" : "message"} key={message?.createAt}>
+                {chat?.messages?.map((message) => (
+                    <div className={message.senderId === currentUser?.id ? "message own" : "message"} key={message?.createdAt}>
                         <div className="texts">
-                            {message.img && <img src={message.img} alt="" />}
+                            {message.img && <img src={message.img} alt="Imagen" />}
                             <p>{message.text}</p>
                         </div>
                     </div>
-                    );
-                })}
-                {img.url && (
+                ))}
+                {img?.url && (
                     <div className="message own">
                         <div className="texts">
                             <img src={img.url} alt="" />
