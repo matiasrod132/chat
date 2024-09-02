@@ -11,7 +11,7 @@ const Chat = () => {
     const [open, setOpen] = useState(false);
     const [text, setText] = useState("");
     const [img, setImg] = useState({
-        file:null,
+        file: null,
         url: "",
     });
 
@@ -22,7 +22,7 @@ const Chat = () => {
     
     useEffect(() => {
         endRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, []);
+    }, [chat?.messages]); // Añade chat?.messages como dependencia
 
     useEffect(() => {
         const unSub = onSnapshot(doc(db, "chats", chatId), (res) => {
@@ -54,7 +54,6 @@ const Chat = () => {
         let imgUrl = null
 
         try{
-
             if(img.file){
                 imgUrl = await upload(img.file);
             }
@@ -92,13 +91,12 @@ const Chat = () => {
                 }
             });
         }catch(err){
-            console.log(err.message)
-            console.log("aa")
+            console.log(err)
         }
 
         setImg({
-            file:null,
-            url:""
+            file: null,
+            url: ""
         })
 
         setText("");
@@ -145,7 +143,7 @@ const Chat = () => {
                     <label htmlFor="file">
                         <img src="./img.png" alt="" />
                     </label>
-                    <input type="file" id="file" style={{display:"none"}} onChange={handleImg}/>
+                    <input type="file" id="file" style={{ display:"none" }} onChange={handleImg}/>
                     <img src="./camera.png" alt="" />
                     <img src="./mic.png" alt="" />
                 </div>
