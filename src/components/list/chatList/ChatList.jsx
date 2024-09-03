@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./chatList.css";
 import AddUser from "./addUser/AddUser";
 import { useUserStore } from "../../../lib/userStore";
@@ -11,6 +11,8 @@ const ChatList = () => {
     const [chats, setChats] = useState([]);
     const [input, setInput] = useState("");
 
+    const addUserRef = useRef(null); // Crear el ref para AddUser
+    const buttonRef = useRef(null); // Crear el ref para el botón de abrir/cerrar AddUser
     const { currentUser } = useUserStore();
     const { chatId, changeChat } = useChatStore();
 
@@ -35,9 +37,9 @@ const ChatList = () => {
             }
         );
 
-        return ()=>{
-            unsub()
-        }
+        return () => {
+            unsub();
+        };
     }, [currentUser.id]);
 
     const handleSelect = async (chat) => {
@@ -66,20 +68,38 @@ const ChatList = () => {
     const filteredChats = chats.filter((c) =>
         c.user.username.toLowerCase().includes(input.toLowerCase())
     );
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (
+                addUserRef.current &&
+                !addUserRef.current.contains(event.target) &&
+                buttonRef.current &&
+                !buttonRef.current.contains(event.target)
+            ) {
+                setAddMode(false); // Cierra el AddUser cuando se hace clic fuera
+            }
+        };
 
+        document.addEventListener("mousedown", handleClickOutside);
+        
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [addUserRef, buttonRef]);
 
     return (
         <div className="chatList">
             <div className="search">
                 <div className="searchBar">
                     <img src="/search.png" alt="" />
-                    <input type="text"  placeholder="Buscar" onChange={(e) => setInput(e.target.value)} />
+                    <input type="text"  placeholder="Buscar..." onChange={(e) => setInput(e.target.value)} />
                 </div>
                 <img 
                   src={addMode ? "./minus.png" : "./plus.png"}
                   alt=""
                   className="add"
                   onClick={()=>setAddMode((prev) => !prev)}
+                  ref={buttonRef}
                 />
             </div>
             {filteredChats.map((chat) => (
@@ -109,7 +129,7 @@ const ChatList = () => {
                     </div>
                 </div>
             ))}
-            {addMode && <AddUser/>}
+            {addMode && <AddUser ref={addUserRef} />}
         </div>
     )
 }

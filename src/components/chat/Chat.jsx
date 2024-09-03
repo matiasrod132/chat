@@ -34,6 +34,13 @@ const Chat = () => {
         }
     }, [chatId])
 
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Previene el comportamiento predeterminado del Enter
+            handleSend(); // Llama a la función que envía el mensaje
+        }
+    }
+
     const handleEmoji = e =>{
         setText(prev=>prev + e.emoji);
         setOpen(false)
@@ -154,6 +161,7 @@ const Chat = () => {
                         : "Escribe un mensaje..."
                     }
                   onChange={(e) => setText(e.target.value)}
+                  onKeyDown={handleKeyDown}
                   disabled={isCurrentUserBlocked || isReceiverBlocked}
                 />
                 <div className="emoji">
