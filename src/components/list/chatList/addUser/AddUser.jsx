@@ -104,7 +104,7 @@ const AddUser = forwardRef((props, ref) => {
             await Promise.all([
                 updateUserChat(currentUser.id),
                 updateUserChat(user.id),
-            ]);
+            ]);            
     
         } catch (err) {
             console.log(err);

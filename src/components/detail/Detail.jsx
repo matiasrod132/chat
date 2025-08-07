@@ -1,13 +1,31 @@
-import { arrayRemove, arrayUnion, doc, updateDoc } from "firebase/firestore";
+import { useState, useEffect } from "react";
+import { arrayRemove, arrayUnion, doc, updateDoc, onSnapshot } from "firebase/firestore";
 import { useChatStore } from "../../lib/chatStore"
 import { auth, db } from "../../lib/firebase"
 import { useUserStore } from "../../lib/userStore";
 import "./detail.css"
 
 const Detail = () => {
-    const { chatId, user, isCurrentUserBlocked, isReceiverBlocked, changeBlock } =
-        useChatStore();
+    const { chatId, user, isCurrentUserBlocked, isReceiverBlocked, changeBlock } =  useChatStore();
     const { currentUser } = useUserStore();
+    const [sharedPhotos, setSharedPhotos] = useState([]);
+    const [showPhotos, setShowPhotos] = useState(false);
+
+    useEffect(() => {
+        if (!chatId) return;
+
+        const unsubscribe = onSnapshot(doc(db, "chats", chatId), (docSnap) => {
+            if (docSnap.exists()) {
+                const messages = docSnap.data().messages || [];
+                const photos = messages
+                    .filter(msg => msg.img)  // solo mensajes con imagen
+                    .map(msg => msg.img);
+                setSharedPhotos(photos);
+            }
+        });
+
+        return () => unsubscribe();
+    }, [chatId]);
 
     const handleBlock = async () => {
         if(!user) return;
@@ -25,9 +43,9 @@ const Detail = () => {
     return (
         <div className="detail">
             <div className="user">
-                <img src={user?.avatar || "./avatar.png"} alt="" />
+                <img src={user?.avatar} alt="Avatar"/>
                 <h2>{user?.username}</h2>
-                <p>LDAODWA DAWOD WAD OAW ODAW ODWA ODA WOD.</p>
+                <p>{user?.description}</p>
             </div>
             <div className="info">
                 <div className="option">
@@ -37,33 +55,38 @@ const Detail = () => {
                     </div>
                 </div>
                 <div className="option">
-                    <div className="title">
-                        <span>Privacy & helP</span>
-                        <img src="./arrowUp.png" alt=""/>
-                    </div>
-                </div>
-                <div className="option">
-                    <div className="title">
+                    <div className="title" onClick={() => setShowPhotos(prev => !prev)} style={{ cursor: 'pointer' }}>
                         <span>Shared photos</span>
-                        <img src="./arrowUp.png" alt=""/>
+                        <img 
+                            src="./arrowUp.png" 
+                            alt=""
+                            style={{
+                                transform: showPhotos ? "rotate(0deg)" : "rotate(180deg)",
+                                transition: "transform 0.3s ease",
+                            }}
+                        />
                     </div>
-                    <div className="photos">
-                        <div className="photoItem">
-                            <div className="photoDetail">
-                                <img src="https://lumiere-a.akamaihd.net/v1/images/3_avtr-460_2647266a.jpeg?region=0,0,1920,1080" alt="" />
-                                <span>Photo_2024_2.png</span>
-                            </div>
-                            <img src="./download.png" alt="" className="icon"/>
+                    {showPhotos && (
+                        <div className="photos">
+                            {sharedPhotos.length === 0 ? (
+                                <span style={{ color: "gray", fontSize: "14px" }}>No hay fotos compartidas aún.</span>
+                            ) : (
+                                sharedPhotos.map((url, i) => (
+                                    <div className="photoItem" key={i}>
+                                        <div className="photoDetail">
+                                            <img src={url} alt={`shared-${i}`} />
+                                            <span>{`Photo_${i + 1}.jpg`}</span>
+                                        </div>
+                                        <a href={url} download>
+                                            <img src="./download.png" alt="download" className="icon" />
+                                        </a>
+                                    </div>
+                                ))
+                            )}
                         </div>
-                        <div className="photoItem">
-                            <div className="photoDetail">
-                                <img src="https://lumiere-a.akamaihd.net/v1/images/3_avtr-460_2647266a.jpeg?region=0,0,1920,1080" alt="" />
-                                <span>Photo_2024_2.png</span>
-                            </div>
-                            <img src="./download.png" alt="" className="icon"/>
-                        </div>
-                    </div>
+                    )}
                 </div>
+
                 <div className="option">
                     <div className="title">
                         <span>Shared Files</span>
